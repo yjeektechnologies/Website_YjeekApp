@@ -18,6 +18,19 @@ export interface CategoryBadge {
   labelAr: string;
 }
 
+export interface Service {
+  id: number;
+  name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
+  icon: string;
+  imageUrl: string;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
 export const DEFAULT_CATEGORY_BADGES: Record<string, CategoryBadge> = {
   food:        { label: "🔥 Most Popular",  labelAr: "🔥 الأكثر طلباً" },
   groceries:   { label: "⚡ Under 15 mins", labelAr: "⚡ أقل من ١٥ دقيقة" },
@@ -35,6 +48,7 @@ export interface SiteConfig {
   socialLinks: Record<string, SocialLink>;
   supportedCountries: SiteCountry[];
   categoryBadges: Record<string, CategoryBadge>;
+  services: Service[];
 }
 
 export const DEFAULT_SOCIAL_LINKS: Record<string, SocialLink> = {
@@ -64,6 +78,7 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   socialLinks: DEFAULT_SOCIAL_LINKS,
   supportedCountries: DEFAULT_SUPPORTED_COUNTRIES,
   categoryBadges: DEFAULT_CATEGORY_BADGES,
+  services: [],
 };
 
 // Module-level cache so all components share one fetch
@@ -72,19 +87,22 @@ let _promise: Promise<SiteConfig> | null = null;
 
 function fetchSiteConfig(): Promise<SiteConfig> {
   if (_promise) return _promise;
-  _promise = fetch("/api/site-config")
-    .then((r) => r.json())
-    .then((d) => {
+  _promise = Promise.all([
+    fetch("/api/site-config").then((r) => r.json()),
+    fetch("/api/services").then((r) => r.json()),
+  ])
+    .then(([siteConfigData, servicesData]) => {
       _cache = {
-        logoUrl:            d.logoUrl            ?? "",
-        faviconUrl:         d.faviconUrl         ?? "",
-        appStoreUrl:        d.appStoreUrl        ?? DEFAULT_SITE_CONFIG.appStoreUrl,
-        googlePlayUrl:      d.googlePlayUrl      ?? DEFAULT_SITE_CONFIG.googlePlayUrl,
-        socialLinks:        { ...DEFAULT_SOCIAL_LINKS, ...(d.socialLinks ?? {}) },
-        supportedCountries: Array.isArray(d.supportedCountries) && d.supportedCountries.length > 0
-                              ? d.supportedCountries
-                              : DEFAULT_SUPPORTED_COUNTRIES,
-        categoryBadges:     { ...DEFAULT_CATEGORY_BADGES, ...(d.categoryBadges ?? {}) },
+        logoUrl: siteConfigData.logoUrl ?? "",
+        faviconUrl: siteConfigData.faviconUrl ?? "",
+        appStoreUrl: siteConfigData.appStoreUrl ?? DEFAULT_SITE_CONFIG.appStoreUrl,
+        googlePlayUrl: siteConfigData.googlePlayUrl ?? DEFAULT_SITE_CONFIG.googlePlayUrl,
+        socialLinks: { ...DEFAULT_SOCIAL_LINKS, ...(siteConfigData.socialLinks ?? {}) },
+        supportedCountries: Array.isArray(siteConfigData.supportedCountries) && siteConfigData.supportedCountries.length > 0
+          ? siteConfigData.supportedCountries
+          : DEFAULT_SUPPORTED_COUNTRIES,
+        categoryBadges: { ...DEFAULT_CATEGORY_BADGES, ...(siteConfigData.categoryBadges ?? {}) },
+        services: Array.isArray(servicesData.services) ? servicesData.services : [],
       };
       return _cache;
     })

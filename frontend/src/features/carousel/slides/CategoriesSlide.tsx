@@ -1,39 +1,72 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Coffee, ShoppingBag, Flower2, Cpu, Watch, Heart } from "lucide-react";
-import { useLang }              from "@/context/LanguageContext";
+import {
+  Coffee, ShoppingBag, Flower2, Cpu, Watch, Heart, Truck, Box, Zap, Star,
+} from "lucide-react";
+import { useLang } from "@/context/LanguageContext";
 import { useSiteConfig, DEFAULT_CATEGORY_BADGES } from "@/hooks/useSiteConfig";
-import { useTranslations }      from "@/hooks/useSiteContent";
-import { SlideContainer }       from "../shared/SlideContainer";
+import { useTranslations } from "@/hooks/useSiteContent";
+import { SlideContainer } from "../shared/SlideContainer";
 
-// ── Badge colour mapping ───────────────────────────────────────────────────────
+// ── Icon mapping ───────────────────────────────────────────────────────────────
 
-const CATEGORY_BADGE_COLOUR_MAP: Record<string, string> = {
-  food:        "bg-orange-500/90 text-white",
-  groceries:   "bg-[#4CAF50]/90 text-white",
-  flowers:     "bg-pink-500/90 text-white",
-  electronics: "bg-blue-500/90 text-white",
-  accessories: "bg-amber-500/90 text-white",
-  pets:        "bg-purple-500/90 text-white",
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Coffee,
+  ShoppingBag,
+  Flower2,
+  Cpu,
+  Watch,
+  Heart,
+  Truck,
+  Box,
+  Zap,
+  Star,
 };
 
-// ── Static category metadata (icon + image + gradient fallback) ────────────────
+// ── Badge colour options ───────────────────────────────────────────────────────
 
-const CATEGORY_TILES = [
-  { id: "food"        as const, Icon: Coffee,      imagePath: "/src/assets/images/cat-food.png",        gradientFallback: "from-[#388E3C]/80 to-[#1B4332]/80" },
-  { id: "groceries"   as const, Icon: ShoppingBag, imagePath: "/src/assets/images/cat-groceries.png",   gradientFallback: "from-[#4CAF50]/80 to-[#388E3C]/80" },
-  { id: "flowers"     as const, Icon: Flower2,     imagePath: "/src/assets/images/cat-flowers.png",     gradientFallback: "from-pink-400/80 to-rose-500/80" },
-  { id: "electronics" as const, Icon: Cpu,         imagePath: "/src/assets/images/cat-electronics.png", gradientFallback: "from-blue-500/80 to-indigo-700/80" },
-  { id: "accessories" as const, Icon: Watch,       imagePath: "/src/assets/images/cat-accessories.png", gradientFallback: "from-amber-400/80 to-orange-600/80" },
-  { id: "pets"        as const, Icon: Heart,       imagePath: "/src/assets/images/cat-pets.png",        gradientFallback: "from-purple-400/80 to-purple-700/80" },
-] as const;
+const BADGE_COLOUR_OPTIONS = [
+  "bg-orange-500/90 text-white",
+  "bg-[#4CAF50]/90 text-white",
+  "bg-pink-500/90 text-white",
+  "bg-blue-500/90 text-white",
+  "bg-amber-500/90 text-white",
+  "bg-purple-500/90 text-white",
+];
+
+// ── Default badge options ───────────────────────────────────────────────────────
+
+const DEFAULT_BADGE_OPTIONS = [
+  { label: "🔥 Most Popular", labelAr: "🔥 الأكثر طلباً" },
+  { label: "⚡ Under 15 mins", labelAr: "⚡ أقل من ١٥ دقيقة" },
+  { label: "🌸 Same day", labelAr: "🌸 نفس اليوم" },
+  { label: "📦 Fast shipping", labelAr: "📦 شحن سريع" },
+  { label: "✨ Trending", labelAr: "✨ الأكثر رواجاً" },
+  { label: "🐾 New arrivals", labelAr: "🐾 وصل جديد" },
+];
+
+// ── Default gradient fallbacks for categories ───────────────────────────────────
+
+const GRADIENT_OPTIONS = [
+  "from-[#388E3C]/80 to-[#1B4332]/80",
+  "from-[#4CAF50]/80 to-[#388E3C]/80",
+  "from-pink-400/80 to-rose-500/80",
+  "from-blue-500/80 to-indigo-700/80",
+  "from-amber-400/80 to-orange-600/80",
+  "from-purple-400/80 to-purple-700/80",
+];
+
+// Helper function to get consistent random value based on ID
+function getByIndex<T>(array: T[], id: number): T {
+  return array[id % array.length];
+}
 
 // ── CategoriesSlide ───────────────────────────────────────────────────────────
 
 export function CategoriesSlide() {
-  const { lang, isRTL }      = useLang();
-  const tr                   = useTranslations().categories;
-  const { categoryBadges }   = useSiteConfig();
+  const { lang, isRTL } = useLang();
+  const tr = useTranslations().categories;
+  const { categoryBadges, services } = useSiteConfig();
 
   return (
     <SlideContainer>
@@ -54,15 +87,18 @@ export function CategoriesSlide() {
 
         {/* Category grid */}
         <div className="grid grid-cols-3 gap-2 md:gap-4" style={{ gridAutoRows: "clamp(100px, 16vh, 200px)" }}>
-          {CATEGORY_TILES.map((category, tileIndex) => {
-            const translatedItem    = tr.items[category.id];
-            const adminBadge        = categoryBadges[category.id] ?? DEFAULT_CATEGORY_BADGES[category.id];
-            const badgeColourClass  = CATEGORY_BADGE_COLOUR_MAP[category.id] ?? "bg-gray-700/90 text-white";
+          {services.map((service, tileIndex) => {
+            const IconComponent = ICON_MAP[service.icon] || ShoppingBag;
+            const title = lang === "ar" ? service.nameAr : service.name;
+            const adminBadge = categoryBadges[service.id.toString()] ?? getByIndex(DEFAULT_BADGE_OPTIONS, service.id);
+            const badgeColourClass = getByIndex(BADGE_COLOUR_OPTIONS, service.id);
+            const gradientFallback = getByIndex(GRADIENT_OPTIONS, service.id);
 
             return (
               <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                key={service.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: tileIndex * 0.06, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ scale: 1.03 }}
                 className="group relative rounded-2xl overflow-hidden cursor-pointer"
@@ -70,17 +106,19 @@ export function CategoriesSlide() {
               >
                 {/* Background image with gradient fallback */}
                 <div className="absolute inset-0 bg-[#111E17]">
-                  <img
-                    src={category.imagePath}
-                    alt={translatedItem?.title ?? ""}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-45 group-hover:scale-110 transition-all duration-700"
-                    onError={(e) => {
-                      const imageElement = e.target as HTMLImageElement;
-                      imageElement.style.display = "none";
-                      imageElement.nextElementSibling?.classList.remove("hidden");
-                    }}
-                  />
-                  <div className={`hidden absolute inset-0 bg-gradient-to-br ${category.gradientFallback}`} />
+                  {service.imageUrl ? (
+                    <img
+                      src={service.imageUrl}
+                      alt={title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-45 group-hover:scale-110 transition-all duration-700"
+                      onError={(e) => {
+                        const imageElement = e.target as HTMLImageElement;
+                        imageElement.style.display = "none";
+                        imageElement.nextElementSibling?.classList.remove("hidden");
+                      }}
+                    />
+                  ) : null}
+                  <div className={`hidden absolute inset-0 bg-gradient-to-br ${gradientFallback}`} />
                 </div>
 
                 {/* Bottom gradient overlay */}
@@ -99,7 +137,7 @@ export function CategoriesSlide() {
 
                 {/* Category label */}
                 <div className="absolute bottom-0 left-0 right-0 p-2 md:p-3">
-                  <h3 className="text-white font-bold text-xs md:text-sm leading-tight">{translatedItem?.title}</h3>
+                  <h3 className="text-white font-bold text-xs md:text-sm leading-tight">{title}</h3>
                 </div>
               </motion.div>
             );

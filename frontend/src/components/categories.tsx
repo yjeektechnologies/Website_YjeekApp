@@ -1,34 +1,62 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Coffee, Flower2, Cpu, Watch, Heart } from "lucide-react";
+import {
+  ArrowRight, ShoppingBag, Coffee, Flower2, Cpu, Watch, Heart, Truck, Box, Zap, Star,
+} from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 import { useTranslations } from "@/hooks/useSiteContent";
 import { useLocation } from "wouter";
 import { useSiteConfig, DEFAULT_CATEGORY_BADGES } from "@/hooks/useSiteConfig";
 
-const BADGE_STYLES: Record<string, string> = {
-  food:        "bg-orange-500/90 text-white",
-  groceries:   "bg-[#4CAF50]/90 text-white",
-  flowers:     "bg-pink-500/90 text-white",
-  electronics: "bg-blue-500/90 text-white",
-  accessories: "bg-amber-500/90 text-white",
-  pets:        "bg-purple-500/90 text-white",
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Coffee,
+  ShoppingBag,
+  Flower2,
+  Cpu,
+  Watch,
+  Heart,
+  Truck,
+  Box,
+  Zap,
+  Star,
 };
+
+const BADGE_STYLE_OPTIONS = [
+  "bg-orange-500/90 text-white",
+  "bg-[#4CAF50]/90 text-white",
+  "bg-pink-500/90 text-white",
+  "bg-blue-500/90 text-white",
+  "bg-amber-500/90 text-white",
+  "bg-purple-500/90 text-white",
+];
+
+const DEFAULT_BADGE_OPTIONS = [
+  { label: "🔥 Most Popular", labelAr: "🔥 الأكثر طلباً" },
+  { label: "⚡ Under 15 mins", labelAr: "⚡ أقل من ١٥ دقيقة" },
+  { label: "🌸 Same day", labelAr: "🌸 نفس اليوم" },
+  { label: "📦 Fast shipping", labelAr: "📦 شحن سريع" },
+  { label: "✨ Trending", labelAr: "✨ الأكثر رواجاً" },
+  { label: "🐾 New arrivals", labelAr: "🐾 وصل جديد" },
+];
+
+const GRADIENT_OPTIONS = [
+  "from-[#388E3C]/80 to-[#1B4332]/80",
+  "from-[#4CAF50]/80 to-[#388E3C]/80",
+  "from-pink-400/80 to-rose-500/80",
+  "from-blue-500/80 to-indigo-700/80",
+  "from-amber-400/80 to-orange-600/80",
+  "from-purple-400/80 to-purple-700/80",
+];
+
+function getByIndex<T>(array: T[], id: number): T {
+  return array[id % array.length];
+}
 
 export function Categories() {
   const { lang, isRTL } = useLang();
   const tr = useTranslations().categories;
   const [, navigate] = useLocation();
-  const { categoryBadges } = useSiteConfig();
-
-  const categories = [
-    { id: "food" as const,        icon: Coffee,      image: "/src/assets/images/cat-food.png",        color: "from-[#388E3C]/80 to-[#1B4332]/80",  colSpan: "col-span-1 md:col-span-2 lg:col-span-2" },
-    { id: "groceries" as const,   icon: ShoppingBag, image: "/src/assets/images/cat-groceries.png",   color: "from-[#4CAF50]/80 to-[#388E3C]/80",  colSpan: "col-span-1 md:col-span-2 lg:col-span-2" },
-    { id: "flowers" as const,     icon: Flower2,     image: "/src/assets/images/cat-flowers.png",     color: "from-pink-400/80 to-rose-500/80",     colSpan: "col-span-1 md:col-span-2 lg:col-span-1" },
-    { id: "electronics" as const, icon: Cpu,         image: "/src/assets/images/cat-electronics.png", color: "from-blue-500/80 to-indigo-700/80",   colSpan: "col-span-1 md:col-span-2 lg:col-span-1" },
-    { id: "accessories" as const, icon: Watch,       image: "/src/assets/images/cat-accessories.png", color: "from-amber-400/80 to-orange-600/80",  colSpan: "col-span-1 md:col-span-2 lg:col-span-1" },
-    { id: "pets" as const,        icon: Heart,       image: "/src/assets/images/cat-pets.png",        color: "from-purple-400/80 to-purple-700/80", colSpan: "col-span-1 md:col-span-2 lg:col-span-1" },
-  ];
+  const { categoryBadges, services } = useSiteConfig();
 
   return (
     <section className="py-24 relative z-10" id="categories">
@@ -57,33 +85,40 @@ export function Categories() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 lg:gap-5 auto-rows-[250px]">
-          {categories.map((cat, index) => {
-            const item = tr.items[cat.id];
-            const badge = categoryBadges[cat.id] ?? DEFAULT_CATEGORY_BADGES[cat.id];
-            const badgeStyle = BADGE_STYLES[cat.id] ?? "bg-gray-700/90 text-white";
+          {services.map((service, index) => {
+            const IconComponent = ICON_MAP[service.icon] || ShoppingBag;
+            const title = lang === "ar" ? service.nameAr : service.name;
+            const description = lang === "ar" ? service.descriptionAr : service.description;
+            const badge = categoryBadges[service.id.toString()] ?? getByIndex(DEFAULT_BADGE_OPTIONS, service.id);
+            const badgeStyle = getByIndex(BADGE_STYLE_OPTIONS, service.id);
+            const gradientFallback = getByIndex(GRADIENT_OPTIONS, service.id);
+            const colSpan = index < 2 ? "col-span-1 md:col-span-2 lg:col-span-2" : "col-span-1 md:col-span-2 lg:col-span-1";
+
             return (
               <motion.div
-                key={cat.id}
+                key={service.id}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ scale: 1.025 }}
-                className={`group relative rounded-3xl overflow-hidden cursor-pointer ${cat.colSpan}`}
+                className={`group relative rounded-3xl overflow-hidden cursor-pointer ${colSpan}`}
                 style={{ willChange: "transform" }}
               >
                 <div className="absolute inset-0" style={{ background: "#111E17" }}>
-                  <img
-                    src={cat.image}
-                    alt={item?.title ?? ""}
-                    className="w-full h-full object-cover opacity-60 group-hover:opacity-45 group-hover:scale-110 transition-all duration-700 ease-out"
-                    onError={(e) => {
-                      const t = e.target as HTMLImageElement;
-                      t.style.display = "none";
-                      t.nextElementSibling?.classList.remove("hidden");
-                    }}
-                  />
-                  <div className={`hidden absolute inset-0 bg-gradient-to-br ${cat.color}`} />
+                  {service.imageUrl ? (
+                    <img
+                      src={service.imageUrl}
+                      alt={title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-45 group-hover:scale-110 transition-all duration-700 ease-out"
+                      onError={(e) => {
+                        const t = e.target as HTMLImageElement;
+                        t.style.display = "none";
+                        t.nextElementSibling?.classList.remove("hidden");
+                      }}
+                    />
+                  ) : null}
+                  <div className={`hidden absolute inset-0 bg-gradient-to-br ${gradientFallback}`} />
                 </div>
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
@@ -111,11 +146,11 @@ export function Categories() {
                 <div className={`absolute inset-0 p-6 md:p-8 flex flex-col justify-end ${isRTL ? "items-end text-right" : ""}`}>
                   <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <div className="w-12 h-12 rounded-full bg-[#4CAF50]/20 backdrop-blur-md flex items-center justify-center mb-4 border border-[#4CAF50]/40">
-                      <cat.icon className="w-6 h-6 text-white" />
+                      <IconComponent className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
+                    <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
                     <p className="text-white/70 mb-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 h-0 group-hover:h-auto">
-                      {item.desc}
+                      {description}
                     </p>
                     <a
                       href="#app"

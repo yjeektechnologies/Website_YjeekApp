@@ -51,6 +51,25 @@ const DEFAULT_COUNTRY_DATA = {
   QA: { cities: ["Doha", "Al Rayyan", "Al Wakrah", "Lusail"], cuisines: ["Machboos", "Lebanese", "Indian", "Pakistani", "Shawarma"] },
 };
 
+// Helper to build dynamic country data based on supported countries
+function buildDynamicCountryData(supportedCountries: any[], savedCountryData: any): Record<string, { cities: string[]; cuisines: string[] }> {
+  const result: Record<string, { cities: string[]; cuisines: string[] }> = {};
+  
+  // First, add data for all supported countries from saved data or defaults
+  for (const country of supportedCountries) {
+    const code = country.code;
+    if (savedCountryData && savedCountryData[code]) {
+      result[code] = savedCountryData[code];
+    } else if (DEFAULT_COUNTRY_DATA[code as keyof typeof DEFAULT_COUNTRY_DATA]) {
+      result[code] = DEFAULT_COUNTRY_DATA[code as keyof typeof DEFAULT_COUNTRY_DATA];
+    } else {
+      result[code] = { cities: [], cuisines: [] };
+    }
+  }
+  
+  return result;
+}
+
 const DEFAULT_CAROUSEL_CONFIG = [
   { id: "hero", label: "Home", visible: true, durationSeconds: 10 },
   { id: "categories", label: "What We Deliver", visible: true, durationSeconds: 10 },
@@ -279,12 +298,15 @@ export async function getAboutPage(_req: Request, res: Response): Promise<void> 
 
 /** GET /api/footer-config */
 export async function getFooterConfig(_req: Request, res: Response): Promise<void> {
-  const s = await getSettingsMap(FOOTER_KEYS);
+  const s = await getSettingsMap([...FOOTER_KEYS, "supported_countries"]);
+  const supportedCountries = safeParseJson(s["supported_countries"], DEFAULT_SUPPORTED_COUNTRIES);
+  const savedCountryData = safeParseJson(s["country_data"], DEFAULT_COUNTRY_DATA);
+  
   res.json({
     contactEmail: s["contact_email"] ?? "info@yjeektech.com",
     companyLinks: safeParseJson<string[]>(s["footer_company_links"], DEFAULT_COMPANY_LINKS),
     partnerLinks: safeParseJson<string[]>(s["footer_partner_links"], DEFAULT_PARTNER_LINKS),
     legalLinks: safeParseJson<string[]>(s["footer_legal_links"], DEFAULT_LEGAL_LINKS),
-    countryData: safeParseJson(s["country_data"], DEFAULT_COUNTRY_DATA),
+    countryData: buildDynamicCountryData(supportedCountries, savedCountryData),
   });
 }

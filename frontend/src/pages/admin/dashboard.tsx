@@ -181,7 +181,6 @@ export default function AdminDashboard() {
   const [savingCarousel, setSavingCarousel] = useState(false);
 
   // ── Footer content ───────────────────────────────────────────────
-  const FOOTER_COUNTRY_CODES = ["BH", "AE", "SA", "KW", "QA"] as const;
   const FOOTER_COUNTRY_NAMES: Record<string, string> = {
     BH: "Bahrain 🇧🇭", AE: "UAE 🇦🇪", SA: "Saudi Arabia 🇸🇦", KW: "Kuwait 🇰🇼", QA: "Qatar 🇶🇦",
   };
@@ -191,13 +190,7 @@ export default function AdminDashboard() {
     partner: "Partner with us\nDrive with us\nSuccess Stories",
     legal: "Terms & Conditions\nPrivacy Policy\nCookie Policy\nSecurity\nFAQ",
   });
-  const [countryData, setCountryData] = useState<Record<string, { cities: string; cuisines: string }>>({
-    BH: { cities: "Manama\nSeef\nRiffa\nMuharraq\nIsa Town",      cuisines: "Machboos\nLebanese\nIndian\nPakistani\nHarees" },
-    AE: { cities: "Dubai\nAbu Dhabi\nSharjah\nAjman",              cuisines: "Emirati\nLebanese\nIndian\nPakistani\nInternational" },
-    SA: { cities: "Riyadh\nJeddah\nDammam\nKhobar",               cuisines: "Kabsa\nLebanese\nIndian\nPakistani\nMandi" },
-    KW: { cities: "Kuwait City\nSalmiya\nHawally\nFarwaniya",      cuisines: "Machboos\nLebanese\nIndian\nPakistani\nHarees" },
-    QA: { cities: "Doha\nAl Rayyan\nAl Wakrah\nLusail",           cuisines: "Machboos\nLebanese\nIndian\nPakistani\nShawarma" },
-  });
+  const [countryData, setCountryData] = useState<Record<string, { cities: string; cuisines: string }>>({});
   const [expandedCountry, setExpandedCountry] = useState<string>("BH");
 
   // ── Category Badges ──────────────────────────────────────────────
@@ -251,11 +244,22 @@ export default function AdminDashboard() {
   function addSupportedCountry(c: CountryOption) {
     if (!supportedCountries.find((x) => x.code === c.code)) {
       setSupportedCountries((prev) => [...prev, c]);
+      // Initialize country data for the new country
+      setCountryData((prev) => ({
+        ...prev,
+        [c.code]: { cities: "", cuisines: "" },
+      }));
     }
     setCountrySearch(""); setShowCountryPicker(false);
   }
   function removeSupportedCountry(code: string) {
     setSupportedCountries((prev) => prev.filter((c) => c.code !== code));
+    // Remove country data for the removed country
+    setCountryData((prev) => {
+      const next = { ...prev };
+      delete next[code];
+      return next;
+    });
   }
   const filteredAllCountries = ALL_COUNTRIES.filter((c) =>
     !supportedCountries.find((x) => x.code === c.code) &&
@@ -474,7 +478,7 @@ export default function AdminDashboard() {
           const parsed = JSON.parse(s["country_data"]) as Record<string, { cities: string[]; cuisines: string[] }>;
           setCountryData((prev) => {
             const next = { ...prev };
-            for (const code of ["BH", "AE", "SA", "KW", "QA"]) {
+            for (const code of Object.keys(parsed)) {
               if (parsed[code]) next[code] = { cities: parsed[code].cities.join("\n"), cuisines: parsed[code].cuisines.join("\n") };
             }
             return next;
@@ -490,9 +494,9 @@ export default function AdminDashboard() {
     try {
       const toArr = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
       const cdJson = Object.fromEntries(
-        FOOTER_COUNTRY_CODES.map((code) => [code, {
-          cities: toArr(countryData[code]?.cities ?? ""),
-          cuisines: toArr(countryData[code]?.cuisines ?? ""),
+        supportedCountries.map((c) => [c.code, {
+          cities: toArr(countryData[c.code]?.cities ?? ""),
+          cuisines: toArr(countryData[c.code]?.cuisines ?? ""),
         }])
       );
       const payload = {
@@ -593,7 +597,7 @@ export default function AdminDashboard() {
       const res = await fetch(url, { method: editingServiceId ? "PATCH" : "POST", headers: { "Content-Type": "application/json", "x-admin-token": token! }, body: JSON.stringify(serviceForm) });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       notify("success", editingServiceId ? "Service updated!" : "Service created!");
-      setShowServiceForm(false); fetchServices();
+      setShowServiceForm(false); fetchServices(); invalidateSiteConfig();
     } catch (err: any) { notify("error", err.message ?? "Save failed"); }
     finally { setSavingService(false); }
   }
@@ -603,6 +607,7 @@ export default function AdminDashboard() {
       setServices((prev) => prev.filter((s) => s.id !== id));
       setDeleteServiceConfirm(null);
       notify("success", "Service deleted");
+      invalidateSiteConfig();
     } catch { notify("error", "Failed to delete service"); }
   }
   async function handleToggleService(s: Service) {
@@ -610,6 +615,7 @@ export default function AdminDashboard() {
       const res = await fetch(`/api/admin/services/${s.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "x-admin-token": token! }, body: JSON.stringify({ isActive: !s.isActive }) });
       const data = await res.json();
       if (data.service) setServices((prev) => prev.map((x) => x.id === s.id ? data.service : x));
+      invalidateSiteConfig();
     } catch { notify("error", "Failed to update service"); }
   }
 
@@ -1606,32 +1612,36 @@ export default function AdminDashboard() {
                 <SectionTitle>🗺️ Country Cities & Cuisines</SectionTitle>
                 <p className="text-sm text-gray-500 mb-5">Popular cities and top cuisines shown in the footer for each country. One item per line. The footer auto-detects the visitor's country and shows the matching list.</p>
                 <div className="space-y-3">
-                  {FOOTER_COUNTRY_CODES.map((code) => (
-                    <div key={code} className="border border-gray-200 rounded-xl overflow-hidden">
-                      <button type="button"
-                        onClick={() => setExpandedCountry((prev) => prev === code ? "" : code)}
-                        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors">
-                        <span className="font-bold text-gray-900">{FOOTER_COUNTRY_NAMES[code]}</span>
-                        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedCountry === code ? "rotate-180" : ""}`} />
-                      </button>
-                      {expandedCountry === code && (
-                        <div className="px-5 pb-5 grid md:grid-cols-2 gap-5 border-t border-gray-100 pt-5">
-                          <Field label="Popular Cities" hint="one per line">
-                            <textarea rows={6} value={countryData[code]?.cities ?? ""}
-                              onChange={(e) => setCountryData((d) => ({ ...d, [code]: { ...d[code], cities: e.target.value } }))}
-                              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 resize-none text-sm text-gray-900 font-mono"
-                              placeholder="City 1&#10;City 2&#10;City 3" />
-                          </Field>
-                          <Field label="Top Cuisines" hint="one per line">
-                            <textarea rows={6} value={countryData[code]?.cuisines ?? ""}
-                              onChange={(e) => setCountryData((d) => ({ ...d, [code]: { ...d[code], cuisines: e.target.value } }))}
-                              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 resize-none text-sm text-gray-900 font-mono"
-                              placeholder="Cuisine 1&#10;Cuisine 2&#10;Cuisine 3" />
-                          </Field>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {supportedCountries.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">Add supported countries first to configure their cities and cuisines.</p>
+                  ) : (
+                    supportedCountries.map((country) => (
+                      <div key={country.code} className="border border-gray-200 rounded-xl overflow-hidden">
+                        <button type="button"
+                          onClick={() => setExpandedCountry((prev) => prev === country.code ? "" : country.code)}
+                          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors">
+                          <span className="font-bold text-gray-900">{country.flag} {country.name}</span>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${expandedCountry === country.code ? "rotate-180" : ""}`} />
+                        </button>
+                        {expandedCountry === country.code && (
+                          <div className="px-5 pb-5 grid md:grid-cols-2 gap-5 border-t border-gray-100 pt-5">
+                            <Field label="Popular Cities" hint="one per line">
+                              <textarea rows={6} value={countryData[country.code]?.cities ?? ""}
+                                onChange={(e) => setCountryData((d) => ({ ...d, [country.code]: { ...d[country.code], cities: e.target.value } }))}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 resize-none text-sm text-gray-900 font-mono"
+                                placeholder="City 1&#10;City 2&#10;City 3" />
+                            </Field>
+                            <Field label="Top Cuisines" hint="one per line">
+                              <textarea rows={6} value={countryData[country.code]?.cuisines ?? ""}
+                                onChange={(e) => setCountryData((d) => ({ ...d, [country.code]: { ...d[country.code], cuisines: e.target.value } }))}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 resize-none text-sm text-gray-900 font-mono"
+                                placeholder="Cuisine 1&#10;Cuisine 2&#10;Cuisine 3" />
+                            </Field>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 

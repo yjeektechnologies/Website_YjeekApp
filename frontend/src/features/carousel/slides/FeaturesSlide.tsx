@@ -31,10 +31,10 @@ export function FeaturesSlide() {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
           className={`mb-3 md:mb-6 ${isRTL ? "text-right" : ""}`}
         >
-          <h2 className="text-xl md:text-4xl font-black tracking-tight text-white">
+          {/* <h2 className="text-xl md:text-4xl font-black tracking-tight text-white">
             {tr.heading1} <span className="text-[#4CAF50]">{tr.heading2}</span>
           </h2>
-          <p className="text-white/50 text-sm mt-1">{tr.subtext}</p>
+          <p className="text-white/50 text-sm mt-1">{tr.subtext}</p> */}
         </motion.div>
 
         {/* Feature cards grid */}
