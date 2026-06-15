@@ -131,7 +131,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 export default function AdminDashboard() {
-  const { token, email, logout, isLoading } = useAdminAuth();
+  const { token, email, logout, isLoading, fetchWithAuth } = useAdminAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<Tab>("launches");
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem("adminDarkMode") === "true");

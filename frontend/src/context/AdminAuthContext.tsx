@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 
 interface AdminAuthContextValue {
   token: string | null;
@@ -6,6 +6,7 @@ interface AdminAuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
+  fetchWithAuth: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextValue>({
@@ -14,6 +15,7 @@ const AdminAuthContext = createContext<AdminAuthContextValue>({
   login: async () => {},
   logout: async () => {},
   isLoading: true,
+  fetchWithAuth: async () => new Response(),
 });
 
 const TOKEN_KEY = "yjeek_admin_token";
@@ -22,6 +24,30 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const logout = useCallback(async () => {
+    if (token) {
+      await fetch("/api/admin/logout", {
+        method: "POST",
+        headers: { "x-admin-token": token },
+      }).catch(() => {});
+    }
+    localStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setEmail(null);
+  }, [token]);
+
+  const fetchWithAuth = useCallback(async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const headers = new Headers(init?.headers);
+    if (token) {
+      headers.set("x-admin-token", token);
+    }
+    const res = await fetch(input, { ...init, headers });
+    if (res.status === 401) {
+      await logout();
+    }
+    return res;
+  }, [token, logout]);
 
   useEffect(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
@@ -61,20 +87,8 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     setEmail(emailInput);
   };
 
-  const logout = async () => {
-    if (token) {
-      await fetch("/api/admin/logout", {
-        method: "POST",
-        headers: { "x-admin-token": token },
-      }).catch(() => {});
-    }
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-    setEmail(null);
-  };
-
   return (
-    <AdminAuthContext.Provider value={{ token, email, login, logout, isLoading }}>
+    <AdminAuthContext.Provider value={{ token, email, login, logout, isLoading, fetchWithAuth }}>
       {children}
     </AdminAuthContext.Provider>
   );

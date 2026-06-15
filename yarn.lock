@@ -3006,7 +3006,7 @@ yargs@17.7.2:
     y18n "^5.0.5"
     yargs-parser "^21.1.1"
 
-"yjeek-backend@file:C:\\Users\\Abdullah Al Noman\\Downloads\\Website_YjeekApp 1\\Website_YjeekApp\\backend":
+"yjeek-backend@file:D:\\PROJECTS\\PROJECTS\\Website_YjeekApp\\backend":
   version "1.0.0"
   resolved "file:backend"
   dependencies:
@@ -3021,7 +3021,7 @@ yargs@17.7.2:
     pino-http "^10.4.0"
     zod "^3.24.1"
 
-"yjeek-frontend@file:C:\\Users\\Abdullah Al Noman\\Downloads\\Website_YjeekApp 1\\Website_YjeekApp\\frontend":
+"yjeek-frontend@file:D:\\PROJECTS\\PROJECTS\\Website_YjeekApp\\frontend":
   version "1.0.0"
   resolved "file:frontend"
   dependencies:
