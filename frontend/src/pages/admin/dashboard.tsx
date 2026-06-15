@@ -318,11 +318,11 @@ export default function AdminDashboard() {
     if (!token) return;
     setFetchingLaunches(true);
     try {
-      const res = await fetch("/api/admin/launches", { headers: { "x-admin-token": token } });
+      const res = await fetchWithAuth("/api/admin/launches");
       setLaunches((await res.json()).launches ?? []);
     } catch { notify("error", "Failed to load launches"); }
     finally { setFetchingLaunches(false); }
-  }, [token]);
+  }, [token, fetchWithAuth]);
   useEffect(() => { fetchLaunches(); }, [fetchLaunches]);
 
   function openCreate() { setForm({ ...emptyForm }); setEditingId(null); setShowForm(true); }
@@ -338,9 +338,9 @@ export default function AdminDashboard() {
     e.preventDefault(); setSaving(true);
     const body = { ...form, launchDate: new Date(form.launchDate).toISOString(), description: form.description || null, descriptionAr: form.descriptionAr || null };
     try {
-      const res = await fetch(editingId ? `/api/admin/launches/${editingId}` : "/api/admin/launches", {
+      const res = await fetchWithAuth(editingId ? `/api/admin/launches/${editingId}` : "/api/admin/launches", {
         method: editingId ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json", "x-admin-token": token! },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
@@ -351,8 +351,8 @@ export default function AdminDashboard() {
   }
   async function handleToggleActive(l: Launch) {
     try {
-      await fetch(`/api/admin/launches/${l.id}`, {
-        method: "PATCH", headers: { "Content-Type": "application/json", "x-admin-token": token! },
+      await fetchWithAuth(`/api/admin/launches/${l.id}`, {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !l.isActive }),
       });
       notify("success", l.isActive ? "Launch hidden" : "Launch activated"); fetchLaunches();
@@ -360,7 +360,7 @@ export default function AdminDashboard() {
   }
   async function handleDeleteLaunch(id: number) {
     try {
-      const res = await fetch(`/api/admin/launches/${id}`, { method: "DELETE", headers: { "x-admin-token": token! } });
+      const res = await fetchWithAuth(`/api/admin/launches/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       notify("success", "Launch removed"); setDeleteConfirm(null); fetchLaunches();
     } catch { notify("error", "Delete failed"); }
@@ -368,8 +368,8 @@ export default function AdminDashboard() {
   async function handleNotify(launchId: number) {
     setNotifySending(true);
     try {
-      const res = await fetch(`/api/admin/launches/${launchId}/notify`, {
-        method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": token! },
+      const res = await fetchWithAuth(`/api/admin/launches/${launchId}/notify`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customMessage: notifyMsg || undefined }),
       });
       const d = await res.json();
@@ -390,26 +390,26 @@ export default function AdminDashboard() {
     try {
       const params = new URLSearchParams({ page: String(page), limit: "50" });
       if (city) params.set("city", city);
-      const res = await fetch(`/api/admin/subscribers?${params}`, { headers: { "x-admin-token": token } });
+      const res = await fetchWithAuth(`/api/admin/subscribers?${params}`);
       const data = await res.json();
       setSubscribers(data.subscribers ?? []); setTotalSubs(data.total ?? 0);
       setSubPage(data.page ?? 1); setSubPages(data.pages ?? 1); setByCity(data.byCity ?? []);
     } catch { notify("error", "Failed to load subscribers"); }
     finally { setFetchingSubs(false); }
-  }, [token]);
+  }, [token, fetchWithAuth]);
   useEffect(() => { if (activeTab === "subscribers") fetchSubscribers(1, cityFilter); }, [activeTab, fetchSubscribers]);
   const handleCityFilter = (city: string) => { setCityFilter(city); setSubPage(1); fetchSubscribers(1, city); };
   async function handleDeleteSub(id: number) {
     setDeletingSubId(id);
     try {
-      await fetch(`/api/admin/subscribers/${id}`, { method: "DELETE", headers: { "x-admin-token": token! } });
+      await fetchWithAuth(`/api/admin/subscribers/${id}`, { method: "DELETE" });
       notify("success", "Subscriber removed"); setDeleteSubConfirm(null); fetchSubscribers(subPage, cityFilter);
     } catch { notify("error", "Remove failed"); }
     finally { setDeletingSubId(null); }
   }
   const handleExport = () => {
     const params = cityFilter ? `?city=${encodeURIComponent(cityFilter)}` : "";
-    fetch(`/api/admin/subscribers/export${params}`, { headers: { "x-admin-token": token! } })
+    fetchWithAuth(`/api/admin/subscribers/export${params}`)
       .then((r) => r.blob())
       .then((blob) => {
         const url = URL.createObjectURL(blob);
@@ -427,7 +427,7 @@ export default function AdminDashboard() {
   const fetchSettings = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch("/api/admin/settings", { headers: { "x-admin-token": token } });
+      const res = await fetchWithAuth("/api/admin/settings");
       const data = await res.json();
       setSettings({ ...emptySettings, ...data.settings }); setSettingsLoaded(true);
       const s = data.settings as Record<string, string>;
@@ -486,7 +486,7 @@ export default function AdminDashboard() {
         } catch {}
       }
     } catch { notify("error", "Failed to load settings"); }
-  }, [token]);
+  }, [token, fetchWithAuth]);
   useEffect(() => { if (activeTab === "settings" && !settingsLoaded) fetchSettings(); }, [activeTab, settingsLoaded, fetchSettings]);
 
   async function handleSaveSettings(e: React.FormEvent) {
@@ -527,8 +527,8 @@ export default function AdminDashboard() {
         category_badges: JSON.stringify(categoryBadges),
       };
       invalidateSiteConfig();
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT", headers: { "Content-Type": "application/json", "x-admin-token": token! },
+      const res = await fetchWithAuth("/api/admin/settings", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -539,8 +539,8 @@ export default function AdminDashboard() {
   async function handleTestEmail(e: React.FormEvent) {
     e.preventDefault(); setTestSending(true);
     try {
-      const res = await fetch("/api/admin/settings/test-email", {
-        method: "POST", headers: { "Content-Type": "application/json", "x-admin-token": token! },
+      const res = await fetchWithAuth("/api/admin/settings/test-email", {
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to: testEmail }),
       });
       const d = await res.json();
@@ -555,11 +555,11 @@ export default function AdminDashboard() {
     if (!token) return;
     setFetchingTestimonials(true);
     try {
-      const res = await fetch("/api/admin/testimonials", { headers: { "x-admin-token": token } });
+      const res = await fetchWithAuth("/api/admin/testimonials");
       setTestimonials((await res.json()).testimonials ?? []);
     } catch { notify("error", "Failed to load testimonials"); }
     finally { setFetchingTestimonials(false); }
-  }, [token]);
+  }, [token, fetchWithAuth]);
   useEffect(() => { if (activeTab === "testimonials") fetchTestimonials(); }, [activeTab, fetchTestimonials]);
 
   // ── Services callbacks ───────────────────────────────────────────
@@ -567,11 +567,11 @@ export default function AdminDashboard() {
     if (!token) return;
     setFetchingServices(true);
     try {
-      const res = await fetch("/api/admin/services", { headers: { "x-admin-token": token } });
+      const res = await fetchWithAuth("/api/admin/services");
       setServices((await res.json()).services ?? []);
     } catch { notify("error", "Failed to load services"); }
     finally { setFetchingServices(false); }
-  }, [token]);
+  }, [token, fetchWithAuth]);
   useEffect(() => { if (activeTab === "services") fetchServices(); }, [activeTab, fetchServices]);
 
   function openCreateService() { setEditingServiceId(null); setServiceForm({ ...emptyService }); setShowServiceForm(true); }
@@ -594,7 +594,7 @@ export default function AdminDashboard() {
     setSavingService(true);
     try {
       const url = editingServiceId ? `/api/admin/services/${editingServiceId}` : "/api/admin/services";
-      const res = await fetch(url, { method: editingServiceId ? "PATCH" : "POST", headers: { "Content-Type": "application/json", "x-admin-token": token! }, body: JSON.stringify(serviceForm) });
+      const res = await fetchWithAuth(url, { method: editingServiceId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(serviceForm) });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       notify("success", editingServiceId ? "Service updated!" : "Service created!");
       setShowServiceForm(false); fetchServices(); invalidateSiteConfig();
@@ -603,7 +603,7 @@ export default function AdminDashboard() {
   }
   async function handleDeleteService(id: number) {
     try {
-      await fetch(`/api/admin/services/${id}`, { method: "DELETE", headers: { "x-admin-token": token! } });
+      await fetchWithAuth(`/api/admin/services/${id}`, { method: "DELETE" });
       setServices((prev) => prev.filter((s) => s.id !== id));
       setDeleteServiceConfirm(null);
       notify("success", "Service deleted");
@@ -612,7 +612,7 @@ export default function AdminDashboard() {
   }
   async function handleToggleService(s: Service) {
     try {
-      const res = await fetch(`/api/admin/services/${s.id}`, { method: "PATCH", headers: { "Content-Type": "application/json", "x-admin-token": token! }, body: JSON.stringify({ isActive: !s.isActive }) });
+      const res = await fetchWithAuth(`/api/admin/services/${s.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isActive: !s.isActive }) });
       const data = await res.json();
       if (data.service) setServices((prev) => prev.map((x) => x.id === s.id ? data.service : x));
       invalidateSiteConfig();
@@ -629,9 +629,9 @@ export default function AdminDashboard() {
   async function handleSaveTestimonial(e: React.FormEvent) {
     e.preventDefault(); setSavingTestimonial(true);
     try {
-      const res = await fetch(editingTestimonialId ? `/api/admin/testimonials/${editingTestimonialId}` : "/api/admin/testimonials", {
+      const res = await fetchWithAuth(editingTestimonialId ? `/api/admin/testimonials/${editingTestimonialId}` : "/api/admin/testimonials", {
         method: editingTestimonialId ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json", "x-admin-token": token! },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(testimonialForm),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
@@ -642,7 +642,7 @@ export default function AdminDashboard() {
   }
   async function handleDeleteTestimonial(id: number) {
     try {
-      await fetch(`/api/admin/testimonials/${id}`, { method: "DELETE", headers: { "x-admin-token": token! } });
+      await fetchWithAuth(`/api/admin/testimonials/${id}`, { method: "DELETE" });
       notify("success", "Review removed"); setDeleteTestimonialConfirm(null); fetchTestimonials();
     } catch { notify("error", "Delete failed"); }
   }
@@ -650,11 +650,11 @@ export default function AdminDashboard() {
   // ── Carousel Config ──────────────────────────────────────────────
   useEffect(() => {
     if (activeTab !== "carousel" || carouselLoaded) return;
-    fetch("/api/admin/carousel-config", { headers: { "x-admin-token": token! } })
+    fetchWithAuth("/api/admin/carousel-config")
       .then((r) => r.json())
       .then((d) => { setCarouselConfig(d.slides ?? []); setCarouselLoaded(true); })
       .catch(() => notify("error", "Failed to load carousel config"));
-  }, [activeTab, carouselLoaded, token]);
+  }, [activeTab, carouselLoaded, fetchWithAuth]);
 
   function updateCarouselSlide(i: number, patch: Partial<{id: string; label: string; visible: boolean; durationSeconds: number}>) {
     setCarouselConfig((c) => c.map((s, idx) => idx === i ? { ...s, ...patch } : s));
@@ -662,9 +662,9 @@ export default function AdminDashboard() {
   async function handleSaveCarousel() {
     setSavingCarousel(true);
     try {
-      const res = await fetch("/api/admin/carousel-config", {
+      const res = await fetchWithAuth("/api/admin/carousel-config", {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "x-admin-token": token! },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slides: carouselConfig }),
       });
       if (!res.ok) throw new Error("Save failed");
