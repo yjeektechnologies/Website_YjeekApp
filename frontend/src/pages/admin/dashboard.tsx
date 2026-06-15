@@ -1886,10 +1886,28 @@ export default function AdminDashboard() {
                         onClick={() => updateCarouselSlide(i, { visible: !slide.visible })}
                         className="flex items-center gap-2 shrink-0"
                       >
-                        <div className={`relative w-10 rounded-full transition-colors shrink-0 ${slide.visible ? "bg-[#4CAF50]" : "bg-gray-200"}`} style={{ height: "22px" }}>
-                          <span className={`absolute top-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform ${slide.visible ? "translate-x-5" : "translate-x-[3px]"}`} />
+                        <div className={`relative w-11 h-6 rounded-full transition-all duration-300 shrink-0 ${
+                          slide.visible 
+                            ? "bg-gradient-to-r from-[#1B5E20] to-[#4CAF50] shadow-md shadow-[#4CAF50]/30" 
+                            : "bg-gradient-to-r from-gray-200 to-gray-300 shadow-md shadow-gray-300/50"
+                        }`}>
+                          <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 flex items-center justify-center ${
+                            slide.visible ? "translate-x-5" : "translate-x-0"
+                          }`}>
+                            {slide.visible ? (
+                              <svg className="w-3 h-3 text-[#4CAF50]" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            ) : (
+                              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </span>
                         </div>
-                        <span className={`text-xs font-medium hidden sm:block ${slide.visible ? "text-[#388E3C]" : "text-gray-400"}`}>
+                        <span className={`text-xs font-medium hidden sm:block transition-colors ${
+                          slide.visible ? "text-[#388E3C]" : "text-gray-400"
+                        }`}>
                           {slide.visible ? "Visible" : "Hidden"}
                         </span>
                       </button>
