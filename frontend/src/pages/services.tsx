@@ -237,6 +237,9 @@ export default function ServicesPage() {
         </section>
       </main>
       <Footer />
+      <div>
+        <h1>FOOTER</h1>
+      </div>
     </div>
   );
 }

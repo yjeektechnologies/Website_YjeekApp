@@ -57,6 +57,8 @@ export function Footer() {
   const [config, setConfig] = useState<FooterConfig>(DEFAULT_CONFIG);
   const { logoUrl, appStoreUrl, googlePlayUrl, socialLinks } = useSiteConfig();
 
+  console.log({socialLinks});
+
   useEffect(() => {
     fetch("/api/footer-config")
       .then((r) => r.json())
@@ -82,7 +84,6 @@ export function Footer() {
       <div className="container mx-auto px-4 md:px-6">
         <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16 ${isRTL ? "text-right" : ""}`}>
 
-          {/* Brand */}
           <div className="lg:col-span-2">
             <Link href="/" className={`flex cursor-pointer mb-6 ${isRTL ? "flex-row-reverse justify-end" : ""}`}>
               <img
