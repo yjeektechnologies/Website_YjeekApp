@@ -7,7 +7,7 @@ import {
   listAllLaunches,
   createLaunch,
   updateLaunch,
-  deactivateLaunch,
+  deleteLaunch,
   notifyLaunch,
 } from "../controllers/launches.controller.js";
 
@@ -21,7 +21,7 @@ router.get("/launches/next", asyncHandler(getNextLaunch));
 router.get("/admin/launches", requireAdminSession, asyncHandler(listAllLaunches));
 router.post("/admin/launches", requireAdminSession, asyncHandler(createLaunch));
 router.patch("/admin/launches/:id", requireAdminSession, asyncHandler(updateLaunch));
-router.delete("/admin/launches/:id", requireAdminSession, asyncHandler(deactivateLaunch));
+router.delete("/admin/launches/:id", requireAdminSession, asyncHandler(deleteLaunch));
 router.post("/admin/launches/:id/notify", requireAdminSession, asyncHandler(notifyLaunch));
 
 export default router;

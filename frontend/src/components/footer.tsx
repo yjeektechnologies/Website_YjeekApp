@@ -28,7 +28,7 @@ const DEFAULT_CONFIG: FooterConfig = {
   },
 };
 
-const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+export const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   facebook:  Facebook,
   twitter:   Twitter,
   instagram: Instagram,
@@ -39,7 +39,7 @@ const SOCIAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   whatsapp:  MessageCircle,
 };
 
-const SOCIAL_LABELS: Record<string, string> = {
+export const SOCIAL_LABELS: Record<string, string> = {
   facebook:  "Facebook",
   twitter:   "X / Twitter",
   instagram: "Instagram",
@@ -56,8 +56,6 @@ export function Footer() {
   const tr = useTranslations().footer;
   const [config, setConfig] = useState<FooterConfig>(DEFAULT_CONFIG);
   const { logoUrl, appStoreUrl, googlePlayUrl, socialLinks } = useSiteConfig();
-
-  console.log({socialLinks});
 
   useEffect(() => {
     fetch("/api/footer-config")

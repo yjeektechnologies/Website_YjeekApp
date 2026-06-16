@@ -69,6 +69,21 @@ export async function updateLaunch(req: Request, res: Response): Promise<void> {
   res.json({ launch });
 }
 
+/** DELETE /api/admin/launches/:id — permanently delete a launch. */
+export async function deleteLaunch(req: Request, res: Response): Promise<void> {
+  const launchId = Number(req.params.id);
+  if (Number.isNaN(launchId)) {
+    res.status(400).json({ error: "Invalid ID" });
+    return;
+  }
+
+  const launch = await Launch.findOneAndDelete({ id: launchId });
+  if (!launch) throw new NotFoundError("Launch", launchId);
+
+  req.log.info({ id: launchId }, "Launch deleted");
+  res.json({ message: "Launch deleted" });
+}
+
 /** DELETE /api/admin/launches/:id — soft-delete (isActive = false). */
 export async function deactivateLaunch(req: Request, res: Response): Promise<void> {
   const launchId = Number(req.params.id);

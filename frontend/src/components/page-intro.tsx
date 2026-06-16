@@ -80,7 +80,9 @@ export function PageIntro({ onComplete }: { onComplete: () => void }) {
           animate={{ opacity: floatersGone ? 0 : 1, y: floatersGone ? -8 : 0 }}
           transition={{ duration: floatersGone ? 0.4 : 0.55, delay: floatersGone ? 0 : 1.8 }}
         >
-          delivery, done right
+
+          {/* // life style */}
+          Life style
         </motion.p>
       </div>
 
