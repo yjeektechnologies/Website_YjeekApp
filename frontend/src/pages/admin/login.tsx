@@ -16,6 +16,7 @@ export default function AdminLogin() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   // OTP form
   const [otpEmail, setOtpEmail] = useState("admin@yjeektech.com");
@@ -25,7 +26,6 @@ export default function AdminLogin() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpExpiry, setOtpExpiry] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
-  const [otpSuccess, setOtpSuccess] = useState("");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -95,7 +95,22 @@ export default function AdminLogin() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setOtpSuccess("Password reset! Update the ADMIN_PASSWORD_HASH secret in your environment settings, then log in.");
+      
+      // Update password in login form and switch to login mode
+      setEmail(otpEmail);
+      setPassword(newPassword);
+      setMode("login");
+      setSuccessMessage("Password reset successfully! You can now log in.");
+      
+      // Auto-login after a short delay
+      setTimeout(async () => {
+        try {
+          await login(otpEmail, newPassword);
+          setLocation("/admin/dashboard");
+        } catch {
+          // If auto-login fails, just stay on login page
+        }
+      }, 1000);
     } catch (err: any) {
       setError(err.message ?? "OTP verification failed");
     } finally {
@@ -133,6 +148,12 @@ export default function AdminLogin() {
                 <h1 className="text-2xl font-black text-gray-900 mb-1">Welcome back</h1>
                 <p className="text-gray-500 text-sm">Sign in to manage your launches</p>
               </div>
+
+              {successMessage && (
+                <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-4 text-sm leading-relaxed mb-5">
+                  ✅ {successMessage}
+                </div>
+              )}
 
               <form onSubmit={handleLogin} className="flex flex-col gap-5">
                 <div>
@@ -187,7 +208,7 @@ export default function AdminLogin() {
               </form>
 
               <button
-                onClick={() => { setMode("forgot"); setError(""); }}
+                onClick={() => { setMode("forgot"); setError(""); setSuccessMessage(""); }}
                 className="w-full mt-5 text-sm text-[#4CAF50] hover:text-[#388E3C] font-medium text-center"
               >
                 Forgot password? Reset via OTP
@@ -273,10 +294,6 @@ export default function AdminLogin() {
                     <RefreshCw className="w-4 h-4" /> Request new OTP
                   </button>
                 </div>
-              ) : otpSuccess ? (
-                <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-4 text-sm leading-relaxed">
-                  ✅ {otpSuccess}
-                </div>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="flex flex-col gap-5">
                   <div>
@@ -326,14 +343,12 @@ export default function AdminLogin() {
                 </form>
               )}
 
-              {!otpSuccess && (
-                <button
-                  onClick={() => { setMode("login"); setError(""); setOtp(""); setOtpSent(false); }}
-                  className="w-full mt-5 text-sm text-gray-400 hover:text-gray-600 font-medium text-center"
-                >
-                  ← Back to login
-                </button>
-              )}
+              <button
+                onClick={() => { setMode("login"); setError(""); setOtp(""); setOtpSent(false); }}
+                className="w-full mt-5 text-sm text-gray-400 hover:text-gray-600 font-medium text-center"
+              >
+                ← Back to login
+              </button>
             </>
           )}
         </div>

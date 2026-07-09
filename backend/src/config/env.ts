@@ -34,7 +34,7 @@ export const env = {
   /** Path to the frontend production build that gets served in single-server mode. */
   clientDistPath: process.env.CLIENT_DIST ?? defaultClientDist,
 
-  adminEmail: process.env.ADMIN_EMAIL ?? "admin@yjeektech.com",
+  adminEmail: process.env.ADMIN_EMAIL ?? "abdullahalnoman@gmail.com",
   adminPasswordHash: process.env.ADMIN_PASSWORD_HASH ?? "",
 
   smtp: {

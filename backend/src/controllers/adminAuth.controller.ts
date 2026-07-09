@@ -7,6 +7,7 @@ import { OtpCode } from "../models/otpCode.model.js";
 import { LoginAdminSchema, VerifyOtpSchema } from "../validation/schemas.js";
 import { ValidationError, AuthenticationError, BusinessRuleError } from "../utils/errors.js";
 import { sendOtpEmail } from "../services/mailer.service.js";
+import { getSettingsMap, upsertSetting } from "../services/settings.service.js";
 
 const SESSION_TTL_MILLISECONDS = 24 * 60 * 60 * 1000; // 24 hours
 const OTP_TTL_MILLISECONDS = 30 * 1000; // 30 seconds
@@ -14,6 +15,7 @@ const OTP_EXPIRY_SECONDS = 30;
 
 const ADMIN_EMAIL = env.adminEmail;
 const ADMIN_PASSWORD_HASH = env.adminPasswordHash;
+const PASSWORD_HASH_SETTING_KEY = "admin_password_hash";
 
 /** POST /api/admin/login */
 export async function loginAdmin(req: Request, res: Response): Promise<void> {
@@ -23,9 +25,10 @@ export async function loginAdmin(req: Request, res: Response): Promise<void> {
   const { email, password } = parsed.data;
   const isEmailMatch = email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
-  // Always run bcrypt (even on email mismatch) for a constant-time response that
-  // does not leak whether the email is valid.
-  const hashToCompare = ADMIN_PASSWORD_HASH || (await bcrypt.hash("__unreachable_placeholder__", 10));
+  // Get password hash from database, fall back to environment variable
+  const settings = await getSettingsMap([PASSWORD_HASH_SETTING_KEY]);
+  const dbPasswordHash = settings[PASSWORD_HASH_SETTING_KEY];
+  const hashToCompare = dbPasswordHash || ADMIN_PASSWORD_HASH || (await bcrypt.hash("__unreachable_placeholder__", 10));
   const isPasswordCorrect = await bcrypt.compare(password, hashToCompare);
 
   if (!isEmailMatch || !isPasswordCorrect) {
@@ -105,11 +108,11 @@ export async function verifyOtp(req: Request, res: Response): Promise<void> {
   await otpRecord.save();
 
   const newPasswordHash = await bcrypt.hash(newPassword, 12);
+  await upsertSetting(PASSWORD_HASH_SETTING_KEY, newPasswordHash);
 
-  req.log.info({ email }, "Admin OTP verified — password reset initiated");
+  req.log.info({ email }, "Admin OTP verified — password reset successful");
   res.json({
-    message: "OTP verified. Update your ADMIN_PASSWORD_HASH environment variable with the value below.",
-    newPasswordHash,
+    message: "Password reset successfully! You can now log in with your new password.",
   });
 }
 
