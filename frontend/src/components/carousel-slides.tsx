@@ -18,4 +18,4 @@ export { FeaturesSlide }      from "@/features/carousel/slides/FeaturesSlide";
 export { AppDownloadSlide }   from "@/features/carousel/slides/AppDownloadSlide";
 export { PartnersSlide }      from "@/features/carousel/slides/PartnersSlide";
 export { TestimonialsSlide }  from "@/features/carousel/slides/TestimonialsSlide";
-export { ComingSoonSlide }    from "@/features/carousel/slides/ComingSoonSlide";
+export { ComingSoonSlide, NoComingSoonLaunchesSlide } from "@/features/carousel/slides/ComingSoonSlide";

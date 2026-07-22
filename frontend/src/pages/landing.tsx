@@ -14,8 +14,8 @@ import {
   AppDownloadSlide,
   PartnersSlide,
   TestimonialsSlide,
-  ComingSoonSlide,
 } from "@/components/carousel-slides";
+import { ComingSoonSlide, NoComingSoonLaunchesSlide } from "@/features/carousel/slides/ComingSoonSlide";
 
 const SLIDES_MASTER = [
   { id: "hero",        Component: HeroSlide,         label: "Home" },
@@ -25,7 +25,6 @@ const SLIDES_MASTER = [
   { id: "appDownload", Component: AppDownloadSlide,  label: "App" },
   { id: "partners",    Component: PartnersSlide,     label: "Partners" },
   { id: "reviews",     Component: TestimonialsSlide, label: "Reviews" },
-  { id: "comingSoon",  Component: ComingSoonSlide,   label: "Soon" },
 ];
 
 interface SlideConfig {
@@ -75,22 +74,25 @@ const slideVariants = {
   }),
 };
 
+interface LaunchData {
+  id: number;
+  city: string;
+  cityAr: string;
+  country: string;
+  launchDate: string;
+  description: string | null;
+  descriptionAr: string | null;
+}
+
 export default function LandingPage() {
   // Reads the module-level flag — true on SPA back-navigation, false on fresh load
   const [introComplete, setIntroComplete] = useState(() => introPlayedThisLoad);
+  const [upcomingLaunches, setUpcomingLaunches] = useState<LaunchData[]>([]);
+  
   // Initialise directly from sessionStorage so carousel is already on the right
   // slide when the splash completes — no flash of the hero slide first.
-  const [currentSlide, setCurrentSlide] = useState(() => {
-    const target = sessionStorage.getItem("gotoSlide");
-    if (target !== null) {
-      const masterIndex = parseInt(target, 10);
-      if (!isNaN(masterIndex) && masterIndex >= 0 && masterIndex < SLIDES_MASTER.length) {
-        sessionStorage.removeItem("gotoSlide");
-        return masterIndex; // SLIDES_MASTER indices == visible indices before config loads
-      }
-    }
-    return 0;
-  });
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
   const [direction, setDirection] = useState(1);
   const [slideConfig, setSlideConfig] = useState<SlideConfig[]>(DEFAULT_SLIDE_CONFIG);
   const [autoplayPaused, setAutoplayPaused] = useState(false);
@@ -98,19 +100,41 @@ export default function LandingPage() {
   const autoplayTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const SLIDES = useMemo(
-    () => SLIDES_MASTER.filter((s) => {
+  const SLIDES = useMemo(() => {
+    const visibleMasterSlides = SLIDES_MASTER.filter((s) => {
       const cfg = slideConfig.find((c) => c.id === s.id);
       return cfg ? cfg.visible !== false : true;
-    }),
-    [slideConfig]
-  );
+    });
+
+    // Filter to only include future launches and build dynamic slides
+    const now = Date.now();
+    const futureLaunches = upcomingLaunches.filter((launch) => 
+      new Date(launch.launchDate).getTime() > now
+    );
+    const comingSoonSlides = futureLaunches.length > 0 
+      ? futureLaunches.map((launch) => ({
+          id: `comingSoon-${launch.id}`,
+          Component: () => <ComingSoonSlide launch={launch} />,
+          label: `${launch.city} Soon`,
+        }))
+      : [{ 
+          id: "comingSoon", 
+          Component: NoComingSoonLaunchesSlide, 
+          label: "Soon" 
+        }];
+
+    return [...visibleMasterSlides, ...comingSoonSlides];
+  }, [slideConfig, upcomingLaunches]);
 
   useEffect(() => {
-    fetch("/api/carousel-config")
-      .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.slides)) setSlideConfig(d.slides); })
-      .catch(() => {});
+    Promise.all([
+      fetch("/api/carousel-config")
+        .then((r) => r.json())
+        .then((d) => { if (Array.isArray(d.slides)) setSlideConfig(d.slides); }),
+      fetch("/api/launches")
+        .then((r) => r.json())
+        .then((d) => setUpcomingLaunches(d.launches ?? [])),
+    ]).catch(() => {});
   }, []);
 
   // Prevent mobile pull-to-refresh from reloading the page while the carousel is active

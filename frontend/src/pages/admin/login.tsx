@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const [mode, setMode] = useState<Mode>("login");
 
   // Login form
-  const [email, setEmail] = useState("admin@yjeektech.com");
+  const [email, setEmail] = useState("abdullahalnoman1512@gmail.com");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +19,7 @@ export default function AdminLogin() {
   const [successMessage, setSuccessMessage] = useState("");
 
   // OTP form
-  const [otpEmail, setOtpEmail] = useState("admin@yjeektech.com");
+  const [otpEmail, setOtpEmail] = useState("abdullahalnoman1512@gmail.com");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showNewPass, setShowNewPass] = useState(false);

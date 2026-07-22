@@ -32,6 +32,8 @@ export async function loginAdmin(req: Request, res: Response): Promise<void> {
   const isPasswordCorrect = await bcrypt.compare(password, hashToCompare);
 
   if (!isEmailMatch || !isPasswordCorrect) {
+    console.log("email:", email);
+    console.log("password:", password, hashToCompare);
     throw new AuthenticationError("Invalid credentials");
   }
 
