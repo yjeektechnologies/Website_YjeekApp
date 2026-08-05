@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support — Yjeek</title>
+<meta name="description" content="Get help with Yjeek. Contact channels, response times, and answers to common questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#12B347; --green-dk:#0D8A36; --ink:#101613; --body:#3F4A44;
+  --muted:#6B7772; --line:#E3E8E5; --bg:#FFFFFF; --tint:#F5F9F6;
+  --sans:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',monospace;
+  --ar:'Noto Kufi Arabic','Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);color:var(--body);background:var(--bg);line-height:1.65;font-size:16px}
+body[dir="rtl"]{font-family:var(--ar)}
+
+.bar{border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:20}
+.bar-in{max-width:940px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font-weight:700;font-size:19px;color:var(--ink);letter-spacing:-.02em;text-decoration:none}
+.logo span{color:var(--green)}
+.langbtn{font-family:var(--mono);font-size:12px;letter-spacing:.04em;padding:7px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--body);cursor:pointer;transition:.15s}
+.langbtn:hover{border-color:var(--green);color:var(--green)}
+.langbtn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+
+.wrap{max-width:940px;margin:0 auto;padding:0 24px}
+.hero{padding:56px 0 40px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:14px}
+h1{font-size:clamp(30px,5vw,44px);font-weight:700;color:var(--ink);letter-spacing:-.025em;line-height:1.13;margin-bottom:16px}
+.lede{font-size:17px;color:var(--muted);max-width:58ch}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 48px}
+.card{border:1px solid var(--line);border-radius:10px;padding:22px;background:#fff;transition:.16s}
+.card:hover{border-color:var(--green);box-shadow:0 2px 14px rgba(18,179,71,.08)}
+.card .k{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+.card h3{font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px}
+.card p{font-size:14px;color:var(--muted);margin-bottom:12px}
+.card a{font-size:14px;font-weight:600;color:var(--green-dk);text-decoration:none;word-break:break-word}
+.card a:hover{text-decoration:underline}
+.sla{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;background:var(--tint);color:var(--body);padding:4px 9px;border-radius:4px;margin-top:12px}
+
+section{margin-bottom:44px;scroll-margin-top:80px}
+h2{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--green);display:inline-block}
+p{margin-bottom:14px;max-width:74ch}
+a{color:var(--green-dk)}
+
+.tbl-scroll{overflow-x:auto;margin:0 0 16px;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:480px}
+th{text-align:start;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:10px 14px;background:var(--tint);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:600;color:var(--ink)}
+
+details{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;overflow:hidden}
+summary{padding:15px 18px;cursor:pointer;font-weight:600;color:var(--ink);font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';font-family:var(--mono);color:var(--green);font-size:19px;flex-shrink:0}
+details[open] summary::after{content:'−'}
+summary:hover{background:var(--tint)}
+summary:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.ans{padding:0 18px 16px;font-size:15px;color:var(--body)}
+.ans p{margin-bottom:10px}
+.ans p:last-child{margin-bottom:0}
+
+.esc{background:var(--tint);border-inline-start:3px solid var(--green);border-radius:0 8px 8px 0;padding:18px 22px;margin:0 0 16px}
+.esc p:last-child{margin-bottom:0}
+
+footer{border-top:1px solid var(--line);padding:28px 0 44px;font-size:13px;color:var(--muted)}
+footer p{margin-bottom:6px;max-width:none}
+
+[data-ar]{display:none}
+body[dir="rtl"] [data-en]{display:none}
+body[dir="rtl"] [data-ar]{display:block}
+body[dir="rtl"] td[data-ar],body[dir="rtl"] th[data-ar]{display:table-cell}
+body[dir="rtl"] h2[data-ar]{display:inline-block}
+body[dir="rtl"] span[data-ar]{display:inline}
+
+@media(max-width:600px){
+  .hero{padding:36px 0 28px}
+  .wrap,.bar-in{padding-inline:18px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body dir="ltr">
+
+<div class="bar">
+  <div class="bar-in">
+    <a href="/" class="logo">Yjeek<span>.</span></a>
+    <button class="langbtn" id="lang" onclick="tog()">العربية</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow" data-en>Support</div>
+    <div class="eyebrow" data-ar>الدعم</div>
+    <h1 data-en>Need a hand?</h1>
+    <h1 data-ar>تحتاج مساعدة؟</h1>
+    <p class="lede" data-en>Reach us the way that suits you. Every channel below is monitored, with the response time we hold ourselves to.</p>
+    <p class="lede" data-ar>تواصل معنا بالطريقة التي تناسبك. كل قناة أدناه مُتابَعة، مع زمن الاستجابة الذي نلتزم به.</p>
+  </header>
+
+  <div class="cards">
+    <div class="card">
+      <div class="k" data-en>Fastest</div>
+      <div class="k" data-ar>الأسرع</div>
+      <h3 data-en>In-app chat</h3>
+      <h3 data-ar>المحادثة داخل التطبيق</h3>
+      <p data-en>Open Yjeek and tap Support. Best for anything about an order in progress.</p>
+      <p data-ar>افتح يجيك واضغط الدعم. الأنسب لأي أمر يخص طلباً جارياً.</p>
+      <span class="sla" data-en>≤ 60 seconds</span>
+      <span class="sla" data-ar>خلال 60 ثانية</span>
+    </div>
+
+    <div class="card">
+      <div class="k" data-en>Email</div>
+      <div class="k" data-ar>البريد</div>
+      <h3 data-en>General support</h3>
+      <h3 data-ar>الدعم العام</h3>
+      <p data-en>For account questions, refunds and anything you want in writing.</p>
+      <p data-ar>لأسئلة الحساب والاسترداد وأي أمر تريده كتابةً.</p>
+      <a href="mailto:info@yjeektech.com">info@yjeektech.com</a><br>
+      <span class="sla" data-en>Within 24 hours</span>
+      <span class="sla" data-ar>خلال 24 ساعة</span>
+    </div>
+
+    <div class="card">
+      <div class="k" data-en>Privacy</div>
+      <div class="k" data-ar>الخصوصية</div>
+      <h3 data-en>Data requests</h3>
+      <h3 data-ar>طلبات البيانات</h3>
+      <p data-en>Access, correct or delete your personal data.</p>
+      <p data-ar>الوصول إلى بياناتك الشخصية أو تصحيحها أو حذفها.</p>
+      <a href="mailto:privacy@yjeektech.com">privacy@yjeektech.com</a><br>
+      <span class="sla" data-en>Within 30 days</span>
+      <span class="sla" data-ar>خلال 30 يوماً</span>
+    </div>
+
+    <div class="card">
+      <div class="k" data-en>Partners</div>
+      <div class="k" data-ar>الشركاء</div>
+      <h3 data-en>List your business</h3>
+      <h3 data-ar>سجّل نشاطك التجاري</h3>
+      <p data-en>29 categories open. Onboarding takes 7 working days.</p>
+      <p data-ar>29 فئة متاحة. التسجيل يستغرق 7 أيام عمل.</p>
+      <a href="mailto:vendors@yjeektech.com">vendors@yjeektech.com</a><br>
+      <span class="sla" data-en>2 working days</span>
+      <span class="sla" data-ar>يوما عمل</span>
+    </div>
+  </div>
+
+  <section>
+    <h2 data-en>Common questions</h2>
+    <h2 data-ar>الأسئلة الشائعة</h2>
+
+    <details>
+      <summary data-en>My order is late. What happens?</summary>
+      <summary data-ar>طلبي تأخر. ماذا يحدث؟</summary>
+      <div class="ans">
+        <p data-en>If your order arrives more than 15 minutes past its target time, Yjeek adds a goodwill credit to your Wallet automatically. You don't need to ask.</p>
+        <p data-ar>إذا وصل طلبك بعد أكثر من 15 دقيقة من الوقت المستهدف، يضيف يجيك رصيداً تعويضياً إلى محفظتك تلقائياً دون الحاجة لطلبه.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary data-en>How do I request a refund?</summary>
+      <summary data-ar>كيف أطلب استرداداً؟</summary>
+      <div class="ans">
+        <p data-en>Tap <strong>Report an Issue</strong> in the app — that's the fastest route. For urgent matters use in-app chat. For detailed complaints, email <a href="mailto:info@yjeektech.com">info@yjeektech.com</a>.</p>
+        <p data-ar>اضغط <strong>الإبلاغ عن مشكلة</strong> داخل التطبيق — وهي الطريقة الأسرع. للأمور العاجلة استخدم المحادثة داخل التطبيق. وللشكاوى المفصّلة راسلنا على <a href="mailto:info@yjeektech.com">info@yjeektech.com</a>.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary data-en>How does the Yjeek Wallet work?</summary>
+      <summary data-ar>كيف تعمل محفظة يجيك؟</summary>
+      <div class="ans">
+        <p data-en>You earn credit on qualifying orders. Credit is spend-only — it can't be withdrawn as cash. Each earning expires 6 months from the date it was credited, and there's no minimum to redeem.</p>
+        <p data-ar>تكسب رصيداً على الطلبات المؤهلة. الرصيد للإنفاق فقط ولا يُسحب نقداً. تنتهي صلاحية كل رصيد بعد 6 أشهر من تاريخ إضافته، ولا يوجد حد أدنى للاستخدام.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary data-en>How do I delete my account?</summary>
+      <summary data-ar>كيف أحذف حسابي؟</summary>
+      <div class="ans">
+        <p data-en>Request deletion from within the app, or email <a href="mailto:privacy@yjeektech.com">privacy@yjeektech.com</a>. We respond within 30 days. Transaction records are kept for 5 years as Bahraini commercial law requires.</p>
+        <p data-ar>اطلب الحذف من داخل التطبيق أو راسل <a href="mailto:privacy@yjeektech.com">privacy@yjeektech.com</a>. نرد خلال 30 يوماً. تُحفظ سجلات المعاملات 5 سنوات وفق القانون التجاري البحريني.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary data-en>How do I join as a partner?</summary>
+      <summary data-ar>كيف أنضم كشريك؟</summary>
+      <div class="ans">
+        <p data-en>Email <a href="mailto:riders@yjeektech.com">riders@yjeektech.com</a>. You'll need a valid ID, driving licence, vehicle registration, insurance, a smartphone, and an LMRA permit if you're not Bahraini.</p>
+        <p data-ar>راسل <a href="mailto:riders@yjeektech.com">riders@yjeektech.com</a>. ستحتاج هوية سارية، رخصة قيادة، استمارة مركبة، تأمين، هاتف ذكي، وتصريح هيئة تنظيم سوق العمل لغير البحرينيين.</p>
+      </div>
+    </details>
+  </section>
+
+  <section>
+    <h2 data-en>All channels</h2>
+    <h2 data-ar>جميع القنوات</h2>
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th data-en>Channel</th><th data-ar>القناة</th>
+            <th data-en>Contact</th><th data-ar>جهة الاتصال</th>
+            <th data-en>Response time</th><th data-ar>زمن الاستجابة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td data-en>In-app chat</td><td data-ar>محادثة التطبيق</td><td data-en>Tap Support in the app</td><td data-ar>اضغط الدعم داخل التطبيق</td><td data-en>≤ 60 seconds</td><td data-ar>خلال 60 ثانية</td></tr>
+          <tr><td data-en>General support</td><td data-ar>الدعم العام</td><td><a href="mailto:info@yjeektech.com">info@yjeektech.com</a></td><td data-en>Within 24 hours</td><td data-ar>خلال 24 ساعة</td></tr>
+          <tr><td data-en>Vendor enquiries</td><td data-ar>استفسارات البائعين</td><td><a href="mailto:vendors@yjeektech.com">vendors@yjeektech.com</a></td><td data-en>2 working days</td><td data-ar>يوما عمل</td></tr>
+          <tr><td data-en>Partner enquiries</td><td data-ar>استفسارات الشركاء</td><td><a href="mailto:riders@yjeektech.com">riders@yjeektech.com</a></td><td data-en>2 working days</td><td data-ar>يوما عمل</td></tr>
+          <tr><td data-en>Privacy &amp; data</td><td data-ar>الخصوصية والبيانات</td><td><a href="mailto:privacy@yjeektech.com">privacy@yjeektech.com</a></td><td data-en>Within 30 days</td><td data-ar>خلال 30 يوماً</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2 data-en>If we don't resolve it</h2>
+    <h2 data-ar>إذا لم نحل المشكلة</h2>
+    <div class="esc">
+      <p data-en>Every complaint is processed. If you're not satisfied with our resolution, you can escalate to the Consumer Protection Directorate at the Ministry of Industry and Commerce.</p>
+      <p data-ar>كل شكوى تُعالَج. وإذا لم تكن راضياً عن الحل، يمكنك التصعيد إلى إدارة حماية المستهلك بوزارة الصناعة والتجارة.</p>
+      <p data-en><strong>MOIC:</strong> +973 17111 · <a href="https://www.moic.gov.bh">www.moic.gov.bh</a></p>
+      <p data-ar><strong>وزارة الصناعة والتجارة:</strong> ‎+973 17111‎ · <a href="https://www.moic.gov.bh">www.moic.gov.bh</a></p>
+    </div>
+  </section>
+
+  <footer>
+    <p data-en>Yjeek Technologies W.L.L (CR No. 110111-3) · Building 2732, Road 3649, Block 436, Al Seef, Kingdom of Bahrain</p>
+    <p data-ar>Yjeek Technologies W.L.L (سجل تجاري 110111-3) · مبنى 2732، طريق 3649، مجمع 436، السيف، مملكة البحرين</p>
+    <p><a href="https://www.yjeektech.com">www.yjeektech.com</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+  </footer>
+</div>
+
+<script>
+function tog(){
+  var b=document.body,btn=document.getElementById('lang');
+  var ar=b.getAttribute('dir')==='rtl';
+  b.setAttribute('dir',ar?'ltr':'rtl');
+  document.documentElement.lang=ar?'en':'ar';
+  btn.textContent=ar?'العربية':'English';
+}
+</script>
+</body>
+</html>
