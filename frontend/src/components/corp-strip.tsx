@@ -9,6 +9,7 @@ const LINKS = [
   { label: "Partner",  labelAr: "شراكة",          href: "/partner" },
   { label: "Drive",    labelAr: "اشتغل معنا",      href: "/drive" },
   { label: "About Us", labelAr: "من نحن",          href: "/about" },
+  { label: "Support",  labelAr: "الدعم",           href: "/support" },
   { label: "Terms",    labelAr: "الشروط",           href: "/legal/terms" },
   { label: "Privacy",  labelAr: "الخصوصية",        href: "/legal/privacy" },
   { label: "Cookies",  labelAr: "الكوكيز",          href: "/legal/cookies" },
