@@ -14,6 +14,8 @@ import LegalPage from "@/pages/legal";
 import AboutPage from "@/pages/about";
 import ServicesPage from "@/pages/services";
 import GetTheAppPage from "@/pages/get-the-app";
+import SupportPage from "@/pages/support";
+import AccountDeletionPage from "@/pages/account-deletion";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import NotFound from "@/pages/not-found";
@@ -29,6 +31,8 @@ function Router() {
       <Route path="/drive" component={DrivePage} />
       <Route path="/about" component={AboutPage} />
       <Route path="/get-the-app" component={GetTheAppPage} />
+      <Route path="/support" component={SupportPage} />
+      <Route path="/account-deletion" component={AccountDeletionPage} />
       <Route path="/legal/:slug" component={LegalPage} />
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
